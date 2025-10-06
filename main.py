@@ -37,7 +37,7 @@ def get_exchange_rate(api_key):
         return None, None
 
 
-def save_exchange_rate(date, rate, filepath="exchange_rate.csv"):
+def save_exchange_rate(date, rate, filepath="exchange_rates.csv"):
     file_exists = os.path.exists(filepath)
     with open(filepath, "a", newline="") as file:
         writer = csv.writer(file)
@@ -63,11 +63,69 @@ def login_to_email(email_address, email_password):
 
 def create_email(rate, sender_name, recipient):
     msg = EmailMessage()
-    msg['Subject'] = "Today's GBP INR Exchange Rate"
+    msg['Subject'] = f"💱 Today's GBP to INR Exchange Rate"
     msg['From'] = sender_name
     msg['To'] = recipient
-    msg.set_content(f"Exchange Rate (GBP-INR): {rate['GBP_INR_Rate']}\n"
-                    f"Date: {rate['date']}\n")
+
+    # Plain text fallback
+    text_content = (
+        f"Hi Jayasree,\n\n"
+        f"Today's exchange rate:\n"
+        f"GBP → INR: {rate['GBP_INR_Rate']}\n"
+        f"Date: {rate['date']}\n\n"
+        f"Regards,\nVinod V V"
+    )
+
+    # HTML version (simple + elegant)
+    html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; background-color:#f9f9f9; margin:0; padding:0;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td align="center" style="padding: 20px;">
+                        <table style="max-width: 600px; background-color:#ffffff; border-radius:10px; padding: 30px; box-shadow: 0 0 10px rgba(0,0,0,0.05);">
+                            <tr>
+                                <td align="center" style="font-size: 24px; color: #0078d7; font-weight: bold;">
+                                    💱 Daily Exchange Rate Update
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 20px 0; font-size: 16px; color: #333;">
+                                    <p>Hi Jayasree,</p>
+                                    <p>Here's today's exchange rate:</p>
+                                    <table width="100%" cellpadding="10" style="border-collapse: collapse;">
+                                        <tr style="background-color: #0078d7; color: white;">
+                                            <th align="left">Base Currency</th>
+                                            <th align="left">Target Currency</th>
+                                            <th align="left">Rate</th>
+                                        </tr>
+                                        <tr style="background-color: #f2f2f2;">
+                                            <td>GBP</td>
+                                            <td>INR</td>
+                                            <td><strong>{rate['GBP_INR_Rate']}</strong></td>
+                                        </tr>
+                                    </table>
+                                    <p style="margin-top: 20px; color:#555;">Date: {rate['date']}</p>
+                                    <p style="margin-top: 20px;">Regards,<br><b>Vinod V V</b></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="center" style="font-size: 12px; color: #999; padding-top: 10px;">
+                                    © {datetime.now().year} Exchange Rate Notifier | Auto-generated email
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        """
+
+    msg.set_content(text_content)
+    msg.add_alternative(html_content, subtype="html")
+    # msg.set_content(f"Exchange Rate (GBP-INR): {rate['GBP_INR_Rate']}\n"
+    #                 f"Date: {rate['date']}\n")
     return msg
 
 
