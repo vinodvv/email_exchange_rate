@@ -26,9 +26,12 @@ def get_exchange_rate(api_key):
     return formatted_date, rate
 
 
-def save_exchange_rate(date, rate):
-    with open("exchange_rates.csv", "a") as file:
+def save_exchange_rate(date, rate, filepath="exchange_rate.csv"):
+    file_exists = os.path.exists(filepath)
+    with open(filepath, "a", newline="") as file:
         writer = csv.writer(file)
+        if not file_exists:
+            writer.writerow(["date", "GBP_INR_Rate"])
         writer.writerow([date, rate])
 
 
