@@ -71,23 +71,31 @@ def create_email(rate, sender_name, recipient):
     return msg
 
 
-email_address, email_password, api_key = load_credentials()
-recipient = os.getenv("EMAIL_RECIPIENT")
-sender_name = os.getenv("SENDER_NAME")
+def main():
+    email_address, email_password, api_key = load_credentials()
+    recipient = os.getenv("EMAIL_RECIPIENT")
+    sender_name = os.getenv("SENDER_NAME", email_address)
 
-date, rate = get_exchange_rate(api_key)
-if not date or not rate:
-    print("Skipping email - not valid rate fetched.")
-    exit()
+    date, rate = get_exchange_rate(api_key)
+    if not date or not rate:
+        print("Exchange rate fetch failed. Exiting.")
+        return
 
-save_exchange_rate(date, rate)
+    save_exchange_rate(date, rate)
 
-exchange_rates = load_exchange_rates()
-smtp = login_to_email(email_address, email_password)
+    exchange_rates = load_exchange_rates()
+    today = datetime.now().strftime("%Y-%m-%d")
 
-today = datetime.now().strftime("%Y-%m-%d")
+    smtp = login_to_email(email_address, email_password)
 
-for rate in exchange_rates:
-    if rate['date'] == today:
-        msg = create_email(rate)
-        smtp.send_message(msg)
+    for rate in exchange_rates:
+        if rate['date'] == today:
+            msg = create_email(rate, sender_name, recipient)
+            smtp.send_message(msg)
+            print("Email sent successfully.")
+            break
+    smtp.quit()
+
+
+if __name__ == "__main__":
+    main()
