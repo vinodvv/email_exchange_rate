@@ -47,10 +47,11 @@ def save_exchange_rate(date, rate, filepath="exchange_rate.csv"):
 
 
 def load_exchange_rates(filepath="exchange_rates.csv"):
-    with open(filepath) as file:
+    if not os.path.exists(filepath):
+        return []
+    with open(filepath, newline="") as file:
         reader = csv.DictReader(file)
-        exchange_rates = list(reader)
-        return exchange_rates
+        return list(reader)
 
 
 def login_to_email(email_address, email_password):
