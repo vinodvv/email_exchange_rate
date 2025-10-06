@@ -17,13 +17,24 @@ def load_credentials():
 
 def get_exchange_rate(api_key):
     url = f"https://v6.exchangerate-api.com/v6/{api_key}/latest/GBP"
-    response = requests.get(url)
-    data = response.json()
-    rate = data["conversion_rates"].get("INR")
-    date_utc_str = data["time_last_update_utc"]
-    date_obj = datetime.strptime(date_utc_str, "%a, %d %b %Y %H:%M:%S %z")
-    formatted_date = date_obj.strftime("%Y-%m-%d")
-    return formatted_date, rate
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        if data["result"] != "success":
+            raise ValueError("API returned error response")
+
+        rate = data["conversion_rates"].get("INR")
+        if rate is None:
+            raise ValueError("INR rate missing from API data")
+
+        date_utc_str = data["time_last_update_utc"]
+        date_obj = datetime.strptime(date_utc_str, "%a, %d %b %Y %H:%M:%S %z")
+        formatted_date = date_obj.strftime("%Y-%m-%d")
+        return formatted_date, rate
+    except Exception as e:
+        print(f"Error fetching exchange rate: {e}")
+        return None, None
 
 
 def save_exchange_rate(date, rate, filepath="exchange_rate.csv"):
