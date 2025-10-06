@@ -72,6 +72,10 @@ def create_email(rate):
 
 email_address, email_password, api_key = load_credentials()
 date, rate = get_exchange_rate(api_key)
+if not date or not rate:
+    print("Skipping email - not valid rate fetched.")
+    exit()
+
 save_exchange_rate(date, rate)
 
 exchange_rates = load_exchange_rates()
