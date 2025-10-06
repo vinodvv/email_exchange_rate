@@ -61,17 +61,20 @@ def login_to_email(email_address, email_password):
     return smtp
 
 
-def create_email(rate):
+def create_email(rate, sender_name, recipient):
     msg = EmailMessage()
     msg['Subject'] = "Today's GBP INR Exchange Rate"
-    msg['From'] = "Vinod VV"
-    msg['To'] = "vinovijayan@hotmail.com"
+    msg['From'] = sender_name
+    msg['To'] = recipient
     msg.set_content(f"Exchange Rate (GBP-INR): {rate['GBP_INR_Rate']}\n"
-                    f"Date: {rate['date']}\n ")
+                    f"Date: {rate['date']}\n")
     return msg
 
 
 email_address, email_password, api_key = load_credentials()
+recipient = os.getenv("EMAIL_RECIPIENT")
+sender_name = os.getenv("SENDER_NAME")
+
 date, rate = get_exchange_rate(api_key)
 if not date or not rate:
     print("Skipping email - not valid rate fetched.")
