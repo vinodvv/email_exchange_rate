@@ -8,6 +8,9 @@ from datetime import datetime
 
 
 def load_credentials():
+    """
+    Load API key, email credentials from a .env file
+    """
     load_dotenv()
     email_address = os.getenv("EMAIL_ADDRESS")
     email_password = os.getenv("EMAIL_PASSWORD")
@@ -16,6 +19,9 @@ def load_credentials():
 
 
 def get_exchange_rate(api_key):
+    """
+    Fetch the current GBP to INR exchange rate from ExchangeRate API
+    """
     url = f"https://v6.exchangerate-api.com/v6/{api_key}/latest/GBP"
     try:
         response = requests.get(url, timeout=10)
@@ -38,6 +44,9 @@ def get_exchange_rate(api_key):
 
 
 def save_exchange_rate(date, rate, filepath="exchange_rates.csv"):
+    """
+    Append the latest exchange rate to a CSV file
+    """
     file_exists = os.path.exists(filepath)
     with open(filepath, "a", newline="") as file:
         writer = csv.writer(file)
@@ -47,6 +56,9 @@ def save_exchange_rate(date, rate, filepath="exchange_rates.csv"):
 
 
 def load_exchange_rates(filepath="exchange_rates.csv"):
+    """
+    Load all stored exchange rates from the CSV file.
+    """
     if not os.path.exists(filepath):
         return []
     with open(filepath, newline="") as file:
@@ -55,6 +67,9 @@ def load_exchange_rates(filepath="exchange_rates.csv"):
 
 
 def login_to_email(email_address, email_password):
+    """
+    Log in to the Gmail SMTP server
+    """
     smtp = smtplib.SMTP("smtp.gmail.com", 587)
     smtp.starttls()
     smtp.login(email_address, email_password)
@@ -62,6 +77,9 @@ def login_to_email(email_address, email_password):
 
 
 def create_email(rate, sender_name, recipient):
+    """
+    Create an email with both plain text and HTML content
+    """
     msg = EmailMessage()
     msg['Subject'] = f"💱 Today's GBP to INR Exchange Rate"
     msg['From'] = sender_name
@@ -130,6 +148,9 @@ def create_email(rate, sender_name, recipient):
 
 
 def main():
+    """
+    Main function that fetches exchange rate, stores it, and emails the user.
+    """
     email_address, email_password, api_key = load_credentials()
     recipient = os.getenv("EMAIL_RECIPIENT")
     sender_name = os.getenv("SENDER_NAME", email_address)
